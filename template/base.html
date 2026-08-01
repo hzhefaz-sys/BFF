@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سامانه پیام ناشناس</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tahoma', 'Segoe UI', sans-serif; }
+        body { background-color: #f4f7f6; color: #333; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .container { background: #ffffff; width: 100%; max-width: 500px; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        h2 { margin-bottom: 20px; text-align: center; color: #075e54; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
+        input, textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+        textarea { height: 120px; resize: vertical; }
+        button, .btn { display: inline-block; width: 100%; padding: 12px; background-color: #128c7e; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; text-align: center; text-decoration: none; font-weight: bold; }
+        button:hover, .btn:hover { background-color: #075e54; }
+        .btn-danger { background-color: #dc3545; width: auto; padding: 6px 12px; font-size: 12px; }
+        .btn-danger:hover { background-color: #c82333; }
+        .alert { padding: 10px; border-radius: 6px; margin-bottom: 15px; text-align: center; font-size: 14px; }
+        .alert-danger { background-color: #f8d7da; color: #721c24; }
+        .alert-success { background-color: #d4edda; color: #155724; }
+        .alert-info { background-color: #d1ecf1; color: #0c5460; }
+        .nav-links { text-align: center; margin-top: 15px; font-size: 14px; }
+        .nav-links a { color: #128c7e; text-decoration: none; font-weight: bold; }
+        .msg-card { background: #f9f9f9; border-right: 4px solid #128c7e; padding: 15px; margin-bottom: 15px; border-radius: 4px; position: relative; }
+        .msg-time { font-size: 11px; color: #888; margin-top: 8px; }
+        .share-box { background: #e7f7f5; padding: 12px; border-radius: 6px; font-size: 13px; word-break: break-all; margin-bottom: 20px; text-align: center; border: 1px dashed #128c7e; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>
