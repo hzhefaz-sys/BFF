@@ -6,7 +6,7 @@ from flask_login import LoginManager, UserMixin, login_user, logout_user, login_
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'dev-secret-key-change-this-in-production'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default-dev-key')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -99,7 +99,7 @@ def logout():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    # لینک اختصاصی کاربر برای اشتراک‌گذاری در واتساپ
+    # لینک اختصاصی کاربر برای اشتراک‌گذاری
     share_url = request.host_url.rstrip('/') + url_for('send_message', slug=current_user.slug)
     messages = Message.query.filter_by(user_id=current_user.id).order_by(Message.created_at.desc()).all()
     return render_template('dashboard.html', share_url=share_url, messages=messages)
@@ -109,20 +109,16 @@ def dashboard():
 def send_message(slug):
     user = User.query.filter_by(slug=slug).first_or_404()
 
-    @app.route('/u/<slug>', methods=['GET', 'POST'])
-    def send_message(slug):
-        user = User.query.filter_by(slug=slug).first_or_404()
+    if request.method == 'POST':
+        content = request.form.get('content').strip()
+        if content:
+            new_msg = Message(content=content, user_id=user.id)
+            db.session.add(new_msg)
+            db.session.commit()
+            return redirect(url_for('message_sent'))
+        flash('متن پیام نمی‌تواند خالی باشد.', 'danger')
 
-        if request.method == 'POST':
-            content = request.form.get('content').strip()
-            if content:
-                new_msg = Message(content=content, user_id=user.id)
-                db.session.add(new_msg)
-                db.session.commit()
-                return redirect(url_for('message_sent'))
-            flash('متن پیام نمی‌تواند خالی باشد.', 'danger')
-
-        return render_template('send_message.html', recipient_name=user.username)
+    return render_template('send_message.html', recipient_name=user.username)
 
 
 @app.route('/sent')
