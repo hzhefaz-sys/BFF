@@ -3,84 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ارسال پیام ناشناس به {{ recipient_name }}</title>
-    <!-- لینک Bootstrap برای ظاهر زیبا -->
+    <title>ساخت حساب کاربری - حرف دل</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            background-color: #f8f9fa;
+            background-color: #121212;
+            color: #e0e0e0;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            justify-content: center;
+            align-items: center;
+            font-family: system-ui, -apple-system, sans-serif;
         }
-        .main-container {
-            flex: 1;
+        .main-card {
+            background-color: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 30px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
         }
-        .footer {
-            text-align: center;
-            padding: 15px;
-            font-size: 14px;
-            color: #6c757d;
+        .form-control {
+            background-color: #2a2a2a;
+            border: 1px solid #444;
+            color: #fff;
+            margin-bottom: 15px;
+        }
+        .form-control:focus {
+            background-color: #2a2a2a;
+            color: #fff;
+            border-color: #0d6efd;
+            box-shadow: none;
+        }
+        .btn-primary {
+            background-color: #0d6efd;
+            border: none;
+            padding: 10px;
             font-weight: bold;
         }
+        .footer {
+            margin-top: 40px;
+            font-size: 14px;
+            color: #888;
+            font-weight: bold;
+        }
+        a { color: #0d6efd; text-decoration: none; }
+        a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
 
-<div class="container main-container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            
-            <!-- کارت ارسال پیام -->
-            <div class="card shadow-sm mb-4">
-                <div class="card-body">
-                    <h4 class="card-title text-center mb-3">ارسال پیام ناشناس به {{ recipient_name }}</h4>
-                    
-                    {% with messages = get_flashed_messages(with_categories=true) %}
-                      {% if messages %}
-                        {% for category, message in messages %}
-                          <div class="alert alert-{{ category }}">{{ message }}</div>
-                        {% endfor %}
-                      {% endif %}
-                    {% endwith %}
+<div class="main-card">
+    <h3 class="text-center mb-4">ساخت حساب جدید</h3>
 
-                    <form method="POST">
-                        <div class="mb-3">
-                            <textarea name="content" class="form-control" rows="4" placeholder="پیام خود را بنویسید..." required></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">ارسال پیام</button>
-                    </form>
-                </div>
-            </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} p-2 text-center" style="font-size: 14px;">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
 
-            <!-- بخش ورود / مدیریت حساب در پایین صفحه -->
-            <div class="card shadow-sm border-secondary">
-                <div class="card-body text-center">
-                    {% if current_user.is_authenticated %}
-                        <p class="mb-2">شما با حساب <strong>{{ current_user.username }}</strong> وارد شده‌اید.</p>
-                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-success w-100 mb-2">ورود به پنل مدیریت پیام‌ها</a>
-                        <a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-sm">خروج از حساب</a>
-                    {% else %}
-                        <h6 class="mb-3">صاحب این لینک هستید یا حساب کاربری دارید؟</h6>
-                        <form action="{{ url_for('login') }}" method="POST">
-                            <div class="mb-2">
-                                <input type="text" name="username" class="form-control form-control-sm" placeholder="نام کاربری" required>
-                            </div>
-                            <div class="mb-2">
-                                <input type="password" name="password" class="form-control form-control-sm" placeholder="رمز عبور" required>
-                            </div>
-                            <button type="submit" class="btn btn-dark btn-sm w-100 mb-2">ورود به حساب</button>
-                        </form>
-                        <small class="text-muted">حساب ندارید؟ <a href="{{ url_for('register') }}">ثبت‌نام کنید</a></small>
-                    {% endif %}
-                </div>
-            </div>
-
+    <form method="POST">
+        <div class="mb-3">
+            <label class="form-label">نام کاربری</label>
+            <input type="text" name="username" class="form-control" placeholder="نام کاربری دلخواه..." required>
         </div>
+        <div class="mb-3">
+            <label class="form-label">رمز عبور</label>
+            <input type="password" name="password" class="form-control" placeholder="رمز عبور..." required>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">ثبت‌نام و ورود</button>
+    </form>
+
+    <div class="text-center mt-3">
+        <small>قبلاً حساب ساخته‌اید؟ <a href="{{ url_for('login') }}">ورود به حساب</a></small>
     </div>
 </div>
 
-<!-- Footer (امضای اختصاصی) -->
 <div class="footer">
     Made by : HeFaz
 </div>
