@@ -29,7 +29,7 @@ class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # <-- این خط باید حتماً user_id باشد
 
 
 @login_manager.user_loader
@@ -48,19 +48,26 @@ def home():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+
     if request.method == 'POST':
-        username = request.form.get('username').strip().lower()
-        password = request.form.get('password')
+        username = request.form.get('username', '').strip().lower()
+        password = request.form.get('password', '')
+
+        if not username or not password:
+            flash('لطفاً تمامی فیلدها را پر کنید.', 'danger')
+            return redirect(url_for('register'))
 
         if User.query.filter_by(username=username).first():
             flash('این نام کاربری قبلاً استفاده شده است.', 'danger')
             return redirect(url_for('register'))
 
-        hashed_pw = generate_password_hash(password, method='scrypt')
+        hashed_pw = generate_password_hash(password)
         new_user = User(
             username=username,
             password_hash=hashed_pw,
-            slug=str(uuid.uuid4())[:8]  # یک شناسه ۸ کاراکتری یکتا
+            slug=str(uuid.uuid4())[:8]
         )
         db.session.add(new_user)
         db.session.commit()
@@ -74,9 +81,12 @@ def register():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+
     if request.method == 'POST':
-        username = request.form.get('username').strip().lower()
-        password = request.form.get('password')
+        username = request.form.get('username', '').strip().lower()
+        password = request.form.get('password', '')
 
         user = User.query.filter_by(username=username).first()
         if user and check_password_hash(user.password_hash, password):
@@ -99,18 +109,18 @@ def logout():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    # لینک اختصاصی کاربر برای اشتراک‌گذاری
     share_url = request.host_url.rstrip('/') + url_for('send_message', slug=current_user.slug)
     messages = Message.query.filter_by(user_id=current_user.id).order_by(Message.created_at.desc()).all()
     return render_template('dashboard.html', share_url=share_url, messages=messages)
 
 
 @app.route('/u/<slug>', methods=['GET', 'POST'])
+@app.route('/u/<slug>', methods=['GET', 'POST'])
 def send_message(slug):
     user = User.query.filter_by(slug=slug).first_or_404()
 
     if request.method == 'POST':
-        content = request.form.get('content').strip()
+        content = request.form.get('content', '').strip()
         if content:
             new_msg = Message(content=content, user_id=user.id)
             db.session.add(new_msg)
@@ -137,9 +147,8 @@ def delete_message(msg_id):
     return redirect(url_for('dashboard'))
 
 
-# ایجاد جدول‌های دیتابیس در صورت عدم وجود
 with app.app_context():
     db.create_all()
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
